@@ -3,19 +3,17 @@
 namespace CheckoutTechTest;
 
 public class CheckoutTests
-{  
-    public static ICheckout GetCheckoutInstance() => new Checkout(CheckoutTestData.Services, CheckoutTestData.Discounts);
-
+{ 
     [Fact]
     // See Example 1 TASK.md
     public void GetTotalPrice_UsingExample1_ShouldReturn20()
     {
         // Arrange
-        var checkout = GetCheckoutInstance();
+        var checkout = new Checkout(CheckoutTestData.Services, CheckoutTestData.Discounts);
+        checkout.Scan("B");
+        checkout.Scan("B");
 
         // Act
-        checkout.Scan("B");
-        checkout.Scan("B");
         var totalPrice = checkout.GetTotalPrice();
 
         // Assert
@@ -28,11 +26,11 @@ public class CheckoutTests
     public void GetTotalPrice_UsingExample2_ShouldReturn23()
     {
         // Arrange
-        var checkout = GetCheckoutInstance();
-
-        // Act
+        var checkout = new Checkout(CheckoutTestData.Services, CheckoutTestData.Discounts);
         checkout.Scan("F");
         checkout.Scan("C");
+
+        // Act
         var totalPrice = checkout.GetTotalPrice();
 
         // Assert
@@ -44,12 +42,12 @@ public class CheckoutTests
     public void GetTotalPrice_UsingExample3_ShouldReturn27()
     {
         // Arrange
-        var checkout = GetCheckoutInstance();
-
-        // Act
+        var checkout = new Checkout(CheckoutTestData.Services, CheckoutTestData.Discounts);
         checkout.Scan("F");
         checkout.Scan("F");
         checkout.Scan("B");
+
+        // Act
         var totalPrice = checkout.GetTotalPrice();
 
         // Assert
@@ -60,13 +58,32 @@ public class CheckoutTests
     public void GetTotalPrice_WithNoServices_ShouldReturn0()
     {
         // Arrange
-        var checkout = GetCheckoutInstance();
+        var checkout = new Checkout(CheckoutTestData.Services, CheckoutTestData.Discounts);
 
         // Act
         var totalPrice = checkout.GetTotalPrice();
 
         // Assert
         Assert.Equal(0, totalPrice);
+    }
+
+    [Fact]
+    public void GetTotalPrice_WithMultipleDiscountsForAService_ShouldUseMultipleDiscounts()
+    {
+        // Arrange
+        List<Discount> discounts = [..CheckoutTestData.Discounts, new("A", 2, 18)];
+        var checkout = new Checkout(CheckoutTestData.Services, discounts);
+        checkout.Scan("A");
+        checkout.Scan("A");
+        checkout.Scan("A");
+        checkout.Scan("A");
+        checkout.Scan("A");
+
+        // Act
+        var totalPrice = checkout.GetTotalPrice();
+
+        // Assert
+        Assert.Equal(43, totalPrice);
     }
 }
 

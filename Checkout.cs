@@ -37,7 +37,7 @@ public class Checkout(IEnumerable<Service> services, IEnumerable<Discount> disco
         var basePrice = servicePrice * quantity;
 
         var usableServiceDiscounts = _discounts
-            .Where(discount => discount.Service == service && discount.Quantity >= quantity)
+            .Where(discount => discount.Service == service && discount.Quantity <= quantity)
             .OrderBy(discount => discount.PricePerService);
 
         if (!usableServiceDiscounts.Any())
