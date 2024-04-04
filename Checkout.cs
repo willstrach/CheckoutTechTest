@@ -1,7 +1,11 @@
 ﻿namespace CheckoutTechTest;
 
 public record Service(string Name, int Price);
-public record Discount(string Service, int Quantity, int Price);
+
+public record Discount(string Service, int Quantity, int Price)
+{
+    public decimal PricePerService => (decimal)Price / (decimal)Quantity;
+};
 
 public class Checkout(IEnumerable<Service> services, IEnumerable<Discount> discounts) : ICheckout
 {
@@ -33,24 +37,33 @@ public class Checkout(IEnumerable<Service> services, IEnumerable<Discount> disco
         var basePrice = servicePrice * quantity;
 
         var usableServiceDiscounts = _discounts
-            .Where(discount => discount.Service == service && discount.Quantity <= quantity);
+            .Where(discount => discount.Service == service && discount.Quantity >= quantity)
+            .OrderBy(discount => discount.PricePerService);
 
         if (!usableServiceDiscounts.Any())
         {
             return basePrice;
         }
 
-        List<int> allPossiblePrices = [basePrice];
+        var cumulativePrice = 0;
+        var remainingQuantity = quantity;
 
         foreach (var discount in usableServiceDiscounts)
         {
-            var discountQuantity = quantity / discount.Quantity;
-            var remainingServiceQuantity = quantity % discount.Quantity;
+            var discountQuantity = remainingQuantity / discount.Quantity;
+            var remainingServiceQuantity = remainingQuantity % discount.Quantity;
 
-            var discountedPrice = (discountQuantity * discount.Price) + (remainingServiceQuantity * servicePrice);
-            allPossiblePrices.Add(discountedPrice);
+            cumulativePrice += discountQuantity * discount.Price;
+            remainingQuantity = remainingServiceQuantity;
+
+            if (remainingQuantity == 0) break;
         }
 
-        return allPossiblePrices.Min();
+        if (remainingQuantity > 0)
+        {
+            cumulativePrice += remainingQuantity * servicePrice;
+        }
+
+        return cumulativePrice;
     }
 }
