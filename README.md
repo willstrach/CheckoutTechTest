@@ -14,7 +14,9 @@ In completing this task assumptions have been made, some of which result in limi
 
 3. **There could exist multiple promotions per service**:
 
-    Discounts increasing with quantity are common, and the task does not rule this out. Given the relative simplicity of implementing support for this case, it has been included in the soluton.
+    Discounts increasing with quantity are common, and the task does not rule this out. This could mean that multiple promotions could apply to a quantity of one service (e.g. with promotions of: 5 for £5, and 10 for £9, 14 would cost £14). 
+    
+     Given the relative simplicity of implementing support for this case, it has been included in the soluton.
 
 2. **No multi-service promotions**: 
     
